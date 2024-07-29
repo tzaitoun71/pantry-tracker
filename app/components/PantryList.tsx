@@ -4,27 +4,13 @@ import * as React from 'react';
 import { Box, IconButton, List, ListItem, ListItemText, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { blue, red } from '@mui/material/colors';
 
 function createData(name: string, quantity: number) {
   return { name, quantity };
 }
 
 const initialRows = [
-  createData('Rice', 10),
-  createData('Pasta', 5),
-  createData('Tomato Sauce', 3),
-  createData('Olive Oil', 2),
-  createData('Peanut Butter', 1),
-  createData('Rice', 10),
-  createData('Pasta', 5),
-  createData('Tomato Sauce', 3),
-  createData('Olive Oil', 2),
-  createData('Peanut Butter', 1),
-  createData('Rice', 10),
-  createData('Pasta', 5),
-  createData('Tomato Sauce', 3),
-  createData('Olive Oil', 2),
-  createData('Peanut Butter', 1),
   createData('Rice', 10),
   createData('Pasta', 5),
   createData('Tomato Sauce', 3),
@@ -72,19 +58,42 @@ const PantryList: React.FC = () => {
   };
 
   return (
-    <Box sx={{ width: '40vw', height: '600px', margin: 'auto', overflow: 'auto' }}>
+    <Box sx={{ width: '40vw', height: '600px', margin: 'auto', overflow: 'auto', boxShadow: 3, borderRadius: 2, padding: 2 }}>
       <List>
         {rows.map((row, idx) => (
-          <ListItem key={row.name} sx={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
+          <ListItem key={row.name} sx={{ display: 'flex', justifyContent: 'space-between', padding: '16px', marginBottom: '8px', boxShadow: 1, borderRadius: 1 }}>
             <ListItemText primary={row.name} secondary={`Quantity: ${row.quantity}`} 
               primaryTypographyProps={{ fontSize: '1.2rem' }}
               secondaryTypographyProps={{ fontSize: '1rem' }}
             />
             <Box>
-              <IconButton onClick={() => handleClickOpen(idx)} size="large" sx={{ marginRight: 1 }}>
+              <IconButton
+                onClick={() => handleClickOpen(idx)}
+                size="large"
+                sx={{
+                  marginRight: 1,
+                  color: blue[500],
+                  '&:hover': {
+                    color: blue[300],
+                    backgroundColor: 'rgba(33, 150, 243, 0.1)', // Lighter blue background on hover
+                  },
+                  transition: 'color 0.3s, background-color 0.3s', // Smooth transition for color and background color
+                }}
+              >
                 <EditIcon fontSize="large" />
               </IconButton>
-              <IconButton onClick={() => handleDelete(row.name)} size="large">
+              <IconButton
+                onClick={() => handleDelete(row.name)}
+                size="large"
+                sx={{
+                  color: red[500],
+                  '&:hover': {
+                    color: red[300],
+                    backgroundColor: 'rgba(244, 67, 54, 0.1)', // Lighter red background on hover
+                  },
+                  transition: 'color 0.3s, background-color 0.3s', // Smooth transition for color and background color
+                }}
+              >
                 <DeleteIcon fontSize="large" />
               </IconButton>
             </Box>

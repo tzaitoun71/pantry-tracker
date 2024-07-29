@@ -1,5 +1,4 @@
 import { Box } from "@mui/material";
-import BasicTable from "./components/PantryList";
 import PantryList from "./components/PantryList";
 
 
