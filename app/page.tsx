@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
-import BasicTable from "./components/BasicTable";
+import BasicTable from "./components/PantryList";
+import PantryList from "./components/PantryList";
 
 
 export default function Home() {
@@ -11,7 +12,7 @@ export default function Home() {
     justifyContent={'center'}
     alignItems={'center'}
     >
-      <BasicTable />
+      <PantryList />
     </Box>
   );
 }
