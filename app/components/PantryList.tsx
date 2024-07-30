@@ -20,7 +20,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { blue, red, green } from '@mui/material/colors';
+import { blue, red, green, amber } from '@mui/material/colors';
 
 function createData(name: string, quantity: number) {
   return { name, quantity };
@@ -36,19 +36,34 @@ const initialRows = [
   createData('Mansaf', 1),
 ];
 
-const darkTheme = createTheme({
+const vibrantTheme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: 'light',
+    primary: {
+      main: amber[500],
+    },
+    secondary: {
+      main: '#00c853'
+    },
     background: {
-      default: '#121212',
-      paper: '#1d1d1d',
+      default: '#f0f2f5',
+      paper: '#ffffff',
     },
     text: {
-      primary: '#ffffff',
-      secondary: '#aaaaaa',
+      primary: '#333333',
+      secondary: '#666666',
     },
   },
   components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: '50px', // Fully rounded buttons
+          textTransform: 'none', // Keep text as is
+          padding: '10px 20px', // Larger padding
+        },
+      },
+    },
     MuiIconButton: {
       styleOverrides: {
         root: {
@@ -69,6 +84,18 @@ const darkTheme = createTheme({
           },
         },
       },
+    },
+  },
+  typography: {
+    fontFamily: 'Poppins, sans-serif', // Modern, clean font
+    h5: {
+      fontWeight: 700,
+    },
+    body1: {
+      fontSize: '1.2rem',
+    },
+    body2: {
+      fontSize: '1rem',
     },
   },
 });
@@ -127,7 +154,7 @@ const PantryList: React.FC = () => {
   };
 
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={vibrantTheme}>
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
         <Button
           variant="contained"
@@ -135,12 +162,10 @@ const PantryList: React.FC = () => {
           onClick={() => handleClickOpen(null)}
           sx={{
             marginBottom: 2,
-            backgroundColor: green[500],
+            backgroundColor: vibrantTheme.palette.secondary.main,
             '&:hover': {
-              backgroundColor: green[300],
+              backgroundColor: '#33d375',
             },
-            borderRadius: 2, // Rounded corners
-            textTransform: 'none', // Keep text as "Add Food"
           }}
         >
           Add Food
@@ -155,6 +180,21 @@ const PantryList: React.FC = () => {
             borderRadius: 2,
             padding: 2,
             backgroundColor: 'background.paper',
+            scrollbarWidth: 'thin',
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: '#e0e0e0',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: '#888888',
+              borderRadius: '10px',
+              border: '2px solid #e0e0e0',
+            },
+            '&::-webkit-scrollbar-thumb:hover': {
+              backgroundColor: '#555555',
+            },
           }}
         >
           <List>
@@ -168,9 +208,9 @@ const PantryList: React.FC = () => {
                   marginBottom: '8px',
                   boxShadow: 1,
                   borderRadius: 1,
-                  backgroundColor: '#333232',
+                  backgroundColor: '#ffffff',
                   '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.08)', // Slightly lighter background color on hover
+                    backgroundColor: '#f0f0f0', // Slightly lighter background color on hover
                   },
                   transition: 'background-color 0.3s',
                 }}
@@ -205,7 +245,7 @@ const PantryList: React.FC = () => {
           <DialogTitle sx={{ fontSize: '1.5rem', color: 'text.primary' }}>
             {isAddMode ? 'Add Item' : 'Edit Item'}
           </DialogTitle>
-          <DialogContent sx={{ backgroundColor: 'background.paper' }}>
+          <DialogContent>
             <DialogContentText sx={{ fontSize: '1.2rem', color: 'text.secondary' }}>
               {isAddMode
                 ? 'To add a new item, please enter the name and quantity.'
@@ -237,7 +277,7 @@ const PantryList: React.FC = () => {
               InputLabelProps={{ sx: { fontSize: '1.2rem', color: 'text.secondary' } }}
             />
           </DialogContent>
-          <DialogActions sx={{ backgroundColor: 'background.paper' }}>
+          <DialogActions>
             <Button onClick={handleClose} sx={{ fontSize: '1.2rem', color: 'text.primary' }}>
               Cancel
             </Button>
