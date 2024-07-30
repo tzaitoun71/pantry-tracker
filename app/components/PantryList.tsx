@@ -20,7 +20,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { blue, red, green, amber } from '@mui/material/colors';
+import { blue, red, amber } from '@mui/material/colors';
 
 function createData(name: string, quantity: number) {
   return { name, quantity };
@@ -43,7 +43,7 @@ const vibrantTheme = createTheme({
       main: amber[500],
     },
     secondary: {
-      main: '#00c853'
+      main: '#00c853',
     },
     background: {
       default: '#f0f2f5',
@@ -89,7 +89,7 @@ const vibrantTheme = createTheme({
   typography: {
     fontFamily: 'Poppins, sans-serif', // Modern, clean font
     h5: {
-      fontWeight: 700,
+      fontWeight: 'bolder',
     },
     body1: {
       fontSize: '1.2rem',
@@ -155,10 +155,23 @@ const PantryList: React.FC = () => {
 
   return (
     <ThemeProvider theme={vibrantTheme}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginTop: 4,
+          width: '60vw',
+          margin: 'auto',
+          boxShadow: 3,
+          borderRadius: 2,
+          padding: 4,
+          backgroundColor: 'background.paper',
+        }}
+      >
         <Button
           variant="contained"
-          startIcon={<AddCircleIcon />}
+          startIcon={<AddCircleIcon sx={{ color: 'white' }} />}
           onClick={() => handleClickOpen(null)}
           sx={{
             marginBottom: 2,
@@ -172,9 +185,8 @@ const PantryList: React.FC = () => {
         </Button>
         <Box
           sx={{
-            width: '40vw',
+            width: '100%',
             height: '600px',
-            margin: 'auto',
             overflow: 'auto',
             boxShadow: 3,
             borderRadius: 2,
@@ -206,6 +218,7 @@ const PantryList: React.FC = () => {
                   justifyContent: 'space-between',
                   padding: '16px',
                   marginBottom: '8px',
+                  marginTop: '8px',
                   boxShadow: 1,
                   borderRadius: 1,
                   backgroundColor: '#ffffff',
