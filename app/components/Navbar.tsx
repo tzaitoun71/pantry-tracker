@@ -114,7 +114,7 @@ const Navbar: React.FC = () => {
         </Drawer>
         {!open && (
           <IconButton onClick={toggleDrawer(true)} sx={{ position: 'fixed', top: '50%', left: 0, zIndex: 1300 }}>
-            <ArrowForwardIosIcon sx={{ color: 'white'}}/>
+            <ArrowForwardIosIcon sx={{ color: 'white', height: '100px', width: '100px', stroke: '#000', strokeWidth: 0.25, filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.5))'}}/>
           </IconButton>
         )}
       </Box>

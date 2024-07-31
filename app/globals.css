@@ -1,6 +1,9 @@
-/* global.css */
 body {
-  background-color: #5393ff; /* Light grey background for the body */
+  background-image: url('./assets/pantry.jpeg'); /* Path to your image */
+  background-size: cover; /* Cover the entire background */
+  background-position: center; /* Center the background */
+  background-repeat: no-repeat; /* Do not repeat the background image */
+  background-attachment: fixed; /* Fix the background image */
   color: #333333;
   font-family: 'Poppins', 'sans-serif';
   margin: 0;
