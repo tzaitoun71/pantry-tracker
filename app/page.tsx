@@ -1,20 +1,14 @@
-import { Box } from "@mui/material";
-import PantryList from "./components/PantryList";
-import Navbar from "./components/Navbar";
+'use client'
+
+import { useRouter } from 'next/navigation';
+import { useEffect } from "react";
 
 export default function Home() {
-  return (
-    <Box
-      width="100vw"
-      height="100vh"
-      display={"flex"}
-      justifyContent={"center"}
-      alignItems={"center"}
-    >
-      <div>
-        <Navbar />
-        <PantryList />
-      </div>
-    </Box>
-  );
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push('/login'); // Redirect to login page
+  }, [router]);
+
+  return null; // Render nothing while redirecting
 }

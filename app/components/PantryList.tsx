@@ -20,7 +20,10 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { blue, red, amber } from '@mui/material/colors';
+import CloseIcon from '@mui/icons-material/Close';
+import CheckIcon from '@mui/icons-material/Check';
+import { blue, red, green, amber } from '@mui/material/colors';
+import { useUser } from '../context/UserContext';
 
 function createData(name: string, quantity: number) {
   return { name, quantity };
@@ -58,9 +61,9 @@ const vibrantTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: '50px', // Fully rounded buttons
-          textTransform: 'none', // Keep text as is
-          padding: '10px 20px', // Larger padding
+          borderRadius: '50px',
+          textTransform: 'none',
+          padding: '10px 20px',
         },
       },
     },
@@ -71,23 +74,23 @@ const vibrantTheme = createTheme({
             color: blue[500],
             '&:hover': {
               color: blue[300],
-              backgroundColor: 'rgba(33, 150, 243, 0.1)', // Lighter blue background on hover
+              backgroundColor: 'rgba(33, 150, 243, 0.1)',
             },
           },
           '&.deleteIcon': {
             color: red[500],
             '&:hover': {
               color: red[300],
-              backgroundColor: 'rgba(244, 67, 54, 0.1)', // Lighter red background on hover
+              backgroundColor: 'rgba(244, 67, 54, 0.1)',
             },
-            transition: 'color 0.3s, background-color 0.3s', // Smooth transition for color and background color
+            transition: 'color 0.3s, background-color 0.3s',
           },
         },
       },
     },
   },
   typography: {
-    fontFamily: 'Poppins, sans-serif', // Modern, clean font
+    fontFamily: 'Poppins, sans-serif',
     h5: {
       fontWeight: 'bolder',
     },
@@ -108,6 +111,7 @@ const PantryList: React.FC = () => {
   const [editQuantity, setEditQuantity] = React.useState<number | null>(null);
   const [error, setError] = React.useState('');
   const [isAddMode, setIsAddMode] = React.useState(false);
+  const { user } = useUser(); // Ensure user context is available
 
   const handleDelete = (name: string) => {
     setRows(rows.filter((row) => row.name !== name));
@@ -223,7 +227,7 @@ const PantryList: React.FC = () => {
                   borderRadius: 1,
                   backgroundColor: '#ffffff',
                   '&:hover': {
-                    backgroundColor: '#f0f0f0', // Slightly lighter background color on hover
+                    backgroundColor: '#f0f0f0',
                   },
                   transition: 'background-color 0.3s',
                 }}
@@ -291,12 +295,12 @@ const PantryList: React.FC = () => {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} sx={{ fontSize: '1.2rem', color: 'text.primary' }}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave} sx={{ fontSize: '1.2rem', color: 'text.primary' }}>
-              Save
-            </Button>
+            <IconButton onClick={handleClose} sx={{ fontSize: '1.2rem', color: red[500] }}>
+              <CloseIcon />
+            </IconButton>
+            <IconButton onClick={handleSave} sx={{ fontSize: '1.2rem', color: green[500] }}>
+              <CheckIcon />
+            </IconButton>
           </DialogActions>
         </Dialog>
       </Box>
