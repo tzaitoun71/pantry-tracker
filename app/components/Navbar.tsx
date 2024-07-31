@@ -4,10 +4,11 @@ import * as React from 'react';
 import { Box, Drawer, IconButton, Typography, Button } from '@mui/material';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import DrawerList from './DrawerList'; // Import your DrawerList component
+import DrawerList from './DrawerList'; 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useUser } from '../context/UserContext';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import { useRouter } from 'next/navigation'; 
 
 const vibrantTheme = createTheme({
   palette: {
@@ -32,6 +33,12 @@ const vibrantTheme = createTheme({
 const Navbar: React.FC = () => {
   const [open, setOpen] = React.useState(false);
   const { user, signOut } = useUser();
+  const router = useRouter();
+
+  const signOutUser = () => {
+    signOut();
+    router.push('/login'); // Use router.push from next/navigation
+  };
 
   const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
     if (
@@ -55,6 +62,9 @@ const Navbar: React.FC = () => {
             '& .MuiDrawer-paper': {
               width: 240,
               boxSizing: 'border-box',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
             },
           }}
         >
@@ -65,6 +75,7 @@ const Navbar: React.FC = () => {
               alignItems: 'center',
               padding: 2,
               backgroundColor: 'background.paper',
+              flexGrow: 1,
             }}
           >
             <IconButton onClick={toggleDrawer(false)} sx={{ alignSelf: 'flex-start' }}>
@@ -78,29 +89,32 @@ const Navbar: React.FC = () => {
                 <Typography variant="body2" sx={{ mb: 2 }}>
                   {user.email}
                 </Typography>
-                <Button
-                  variant="contained"
-                  startIcon={<ExitToAppIcon />}
-                  onClick={signOut}
-                  sx={{
-                    backgroundColor: vibrantTheme.palette.secondary.main,
-                    '&:hover': {
-                      backgroundColor: '#33d375',
-                    },
-                    mt: 'auto',
-                    width: '100%',
-                  }}
-                >
-                  Sign Out
-                </Button>
               </>
             )}
             <DrawerList />
           </Box>
+          {user && (
+            <Box sx={{ padding: 2, backgroundColor: 'background.paper' }}>
+              <Button
+                variant="contained"
+                startIcon={<ExitToAppIcon />}
+                onClick={signOutUser}
+                sx={{
+                  backgroundColor: vibrantTheme.palette.secondary.main,
+                  '&:hover': {
+                    backgroundColor: '#33d375',
+                  },
+                  width: '100%',
+                }}
+              >
+                Sign Out
+              </Button>
+            </Box>
+          )}
         </Drawer>
         {!open && (
           <IconButton onClick={toggleDrawer(true)} sx={{ position: 'fixed', top: '50%', left: 0, zIndex: 1300 }}>
-            <ArrowForwardIosIcon />
+            <ArrowForwardIosIcon sx={{ color: 'white'}}/>
           </IconButton>
         )}
       </Box>

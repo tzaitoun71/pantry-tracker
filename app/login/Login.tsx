@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Box, Button, Typography, createTheme, ThemeProvider } from '@mui/material';
 import { Google } from '@mui/icons-material';
-import { signInWithPopup, auth, provider } from '../Firebase';
+import { signInWithGoogle } from '../Firebase';
 import { useRouter } from 'next/navigation';
 import { useUser } from '../context/UserContext';
 
@@ -50,7 +50,7 @@ const Login: React.FC = () => {
 
   const handleGoogleLogin = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithGoogle();
       setUser(result.user);
       router.push('/pantry-list'); // Redirect to pantry list page after successful login
     } catch (error) {
@@ -67,30 +67,35 @@ const Login: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'center',
           height: '100vh',
-          backgroundColor: 'background.default',
         }}
       >
         <Box
           sx={{
             width: '400px',
+            height: '200px',
             padding: 4,
             boxShadow: 3,
             borderRadius: 2,
             backgroundColor: 'background.paper',
             textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           <Typography variant="h5" sx={{ mb: 2, color: 'text.primary' }}>
-            Login
+            Pantry Tracker
           </Typography>
           <Button
             variant="contained"
-            startIcon={<Google />}
+            startIcon={<Google sx={{ color: '#DB4437' }} />}
             onClick={handleGoogleLogin}
             sx={{
-              backgroundColor: vibrantTheme.palette.primary.main,
+              backgroundColor: 'transparent',
+              boxShadow: 3,
               '&:hover': {
-                backgroundColor: vibrantTheme.palette.primary.dark,
+                backgroundColor: 'rgba(0, 0, 0, 0.04)',
               },
             }}
           >
