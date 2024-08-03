@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import { useState, useEffect } from 'react';
 import {
   Box,
+  Button,
   IconButton,
   List,
   ListItem,
@@ -10,93 +11,84 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
-  Button,
   TextField,
   createTheme,
   ThemeProvider,
   Typography,
-} from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import CloseIcon from "@mui/icons-material/Close";
-import CheckIcon from "@mui/icons-material/Check";
-import { blue, red, green, amber } from "@mui/material/colors";
-import { useUser } from "../context/UserContext";
-import { db } from "../Firebase";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
+  CircularProgress,
+  InputAdornment,
+} from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Check, Close, Search } from '@mui/icons-material';
+import { blue, red, green } from '@mui/material/colors';
+import { useUser } from '../context/UserContext';
+import { db } from '../Firebase';
+import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import ImageCapture from './ImageCapture';
 
 const vibrantTheme = createTheme({
   palette: {
-    mode: "light",
+    mode: 'light',
     primary: {
-      main: amber[500],
+      main: '#007bff',
     },
     secondary: {
-      main: "#00c853",
+      main: '#28a745',
     },
     background: {
-      default: "#f0f2f5",
-      paper: "#ffffff",
+      default: '#f8f9fa',
+      paper: '#ffffff',
     },
     text: {
-      primary: "#333333",
-      secondary: "#666666",
+      primary: '#212529',
+      secondary: '#6c757d',
     },
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "50px",
-          textTransform: "none",
-          padding: "10px 20px",
+          borderRadius: '8px',
+          textTransform: 'none',
+          padding: '10px 20px',
         },
       },
     },
     MuiIconButton: {
       styleOverrides: {
         root: {
-          "&.editIcon": {
+          '&.editIcon': {
             color: blue[500],
-            "&:hover": {
+            '&:hover': {
               color: blue[300],
-              backgroundColor: "rgba(33, 150, 243, 0.1)",
+              backgroundColor: 'rgba(33, 150, 243, 0.1)',
             },
           },
-          "&.deleteIcon": {
+          '&.deleteIcon': {
             color: red[500],
-            "&:hover": {
+            '&:hover': {
               color: red[300],
-              backgroundColor: "rgba(244, 67, 54, 0.1)",
+              backgroundColor: 'rgba(244, 67, 54, 0.1)',
             },
-            transition: "color 0.3s, background-color 0.3s",
+            transition: 'color 0.3s, background-color 0.3s',
           },
         },
       },
     },
   },
   typography: {
-    fontFamily: "Poppins, sans-serif",
+    fontFamily: 'Roboto, sans-serif',
     h5: {
-      fontWeight: "bolder",
+      fontWeight: 'bold',
     },
     body1: {
-      fontSize: "1.2rem",
+      fontSize: '1rem',
     },
     body2: {
-      fontSize: "1rem",
+      fontSize: '0.875rem',
     },
   },
 });
@@ -109,50 +101,53 @@ type PantryItem = {
 };
 
 const PantryList: React.FC = () => {
-  const [rows, setRows] = React.useState<PantryItem[]>([]);
-  const [open, setOpen] = React.useState(false);
-  const [currentIdx, setCurrentIdx] = React.useState<number | null>(null);
-  const [editName, setEditName] = React.useState("");
-  const [editQuantity, setEditQuantity] = React.useState<number | null>(null);
-  const [error, setError] = React.useState("");
-  const [isAddMode, setIsAddMode] = React.useState(false);
-  const { user } = useUser(); // Ensure user context is available
+  const [rows, setRows] = useState<PantryItem[]>([]);
+  const [filteredRows, setFilteredRows] = useState<PantryItem[]>([]);
+  const [open, setOpen] = useState(false);
+  const [openCamera, setOpenCamera] = useState(false);
+  const [currentIdx, setCurrentIdx] = useState<number | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editQuantity, setEditQuantity] = useState<number | null>(null);
+  const [error, setError] = useState('');
+  const [isAddMode, setIsAddMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const { user } = useUser();
 
   const fetchPantryItems = async () => {
     if (user) {
-      const q = query(
-        collection(db, "pantry"),
-        where("userId", "==", user.uid)
-      );
+      const q = query(collection(db, 'pantry'), where('userId', '==', user.uid));
       const querySnapshot = await getDocs(q);
-      const items: PantryItem[] = querySnapshot.docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as PantryItem)
-      );
+      const items: PantryItem[] = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as PantryItem));
       setRows(items);
+      setFilteredRows(items); // Set the filtered rows initially to all items
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchPantryItems();
   }, [user]);
 
+  useEffect(() => {
+    if (searchQuery === '') {
+      setFilteredRows(rows);
+    } else {
+      setFilteredRows(rows.filter(row => row.name.toLowerCase().includes(searchQuery.toLowerCase())));
+    }
+  }, [searchQuery, rows]);
+
   const handleDelete = async (id: string) => {
-    await deleteDoc(doc(db, "pantry", id));
+    await deleteDoc(doc(db, 'pantry', id));
     setRows(rows.filter((row) => row.id !== id));
   };
 
-  const handleClickOpen = (idx: number | null) => {
+  const handleClickOpen = (idx: number | null, itemName: string = '') => {
     setCurrentIdx(idx);
     if (idx !== null) {
       setEditName(rows[idx].name);
       setEditQuantity(rows[idx].quantity);
       setIsAddMode(false);
     } else {
-      setEditName("");
+      setEditName(itemName);
       setEditQuantity(null);
       setIsAddMode(true);
     }
@@ -161,158 +156,167 @@ const PantryList: React.FC = () => {
 
   const handleClose = () => {
     setOpen(false);
-    setError("");
+    setError('');
   };
 
   const handleSave = async () => {
-    if (
-      rows.some(
-        (row) =>
-          row.name === editName &&
-          currentIdx !== rows.findIndex((r) => r.name === editName)
-      )
-    ) {
-      setError("Item name must be unique.");
+    if (rows.some((row) => row.name === editName && currentIdx !== rows.findIndex((r) => r.name === editName))) {
+      setError('Item name must be unique.');
       return;
     }
-    if (editName.trim() === "" || editQuantity === null || editQuantity <= 0) {
-      setError("Please enter valid item details.");
+    if (editName.trim() === '' || editQuantity === null || editQuantity <= 0) {
+      setError('Please enter valid item details.');
       return;
     }
 
     if (user !== null) {
       if (currentIdx !== null && !isAddMode) {
-        const updatedItem = {
-          name: editName,
-          quantity: editQuantity,
-          userId: user.uid,
-        };
+        const updatedItem = { name: editName, quantity: editQuantity, userId: user.uid };
         const itemId = rows[currentIdx].id;
-        await updateDoc(doc(db, "pantry", itemId), updatedItem);
-        const updatedRows = rows.map((row, i) =>
-          i === currentIdx ? { ...updatedItem, id: itemId } : row
-        );
+        await updateDoc(doc(db, 'pantry', itemId), updatedItem);
+        const updatedRows = rows.map((row, i) => (i === currentIdx ? { ...updatedItem, id: itemId } : row));
         setRows(updatedRows);
       } else {
-        const newItem = {
-          name: editName,
-          quantity: editQuantity,
-          userId: user.uid,
-        };
-        const docRef = await addDoc(collection(db, "pantry"), newItem);
+        const newItem = { name: editName, quantity: editQuantity, userId: user.uid };
+        const docRef = await addDoc(collection(db, 'pantry'), newItem);
         setRows([...rows, { ...newItem, id: docRef.id }]);
       }
       setOpen(false);
-      setError("");
+      setError('');
     }
+  };
+
+  const handleImageProcessed = (itemName: string) => {
+    handleClickOpen(null, itemName);
+    setOpenCamera(false); // Close the image capture modal after processing
   };
 
   return (
     <ThemeProvider theme={vibrantTheme}>
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
           marginTop: 4,
-          width: "80vw",
-          maxWidth: "900px",
-          margin: "auto",
+          width: '80vw',
+          maxWidth: '900px',
+          margin: 'auto',
           boxShadow: 3,
           borderRadius: 4,
           padding: 4,
-          backgroundColor: "background.paper",
-          backdropFilter: "blur(10px)", // Blurs the background for a modern effect
-          filter: "0 4px 8px rgba(0,0,0,0.1)",
+          backgroundColor: 'background.paper',
+          backdropFilter: 'blur(10px)', // Blurs the background for a modern effect
+          filter: '0 4px 8px rgba(0,0,0,0.1)',
         }}
       >
-        <Typography variant="h5" sx={{ mb: 3, color: "text.primary" }}>
+        <Typography variant="h5" sx={{ mb: 3, color: 'text.primary', fontSize: '36px' }}>
           My Pantry
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddCircleIcon sx={{ color: "white" }} />}
-          onClick={() => handleClickOpen(null)}
-          sx={{
-            marginBottom: 3,
-            backgroundColor: vibrantTheme.palette.secondary.main,
-            "&:hover": {
-              backgroundColor: "#33d375",
-            },
+        <Box sx={{ display: 'flex', gap: 2, marginBottom: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={<AddCircleIcon sx={{ color: 'white' }} />}
+            onClick={() => handleClickOpen(null)}
+            sx={{
+              backgroundColor: vibrantTheme.palette.primary.main,
+              '&:hover': {
+                backgroundColor: vibrantTheme.palette.primary.dark,
+              },
+            }}
+          >
+            Add Food
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddCircleIcon sx={{ color: 'white' }} />}
+            onClick={() => setOpenCamera(true)}
+            sx={{
+              backgroundColor: vibrantTheme.palette.secondary.main,
+              '&:hover': {
+                backgroundColor: vibrantTheme.palette.secondary.dark,
+              },
+            }}
+          >
+            Add Food by Picture
+          </Button>
+        </Box>
+        <TextField
+          fullWidth
+          placeholder="Search for food..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ mb: 2 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
           }}
-        >
-          Add Food
-        </Button>
+        />
         <Box
           sx={{
-            width: "100%",
-            height: "60vh",
-            overflow: "auto",
+            width: '100%',
+            height: '60vh',
+            overflow: 'auto',
             boxShadow: 3,
             borderRadius: 2,
             padding: 2,
-            backgroundColor: "background.paper",
-            scrollbarWidth: "thin",
-            "&::-webkit-scrollbar": {
-              width: "8px",
+            backgroundColor: 'background.paper',
+            scrollbarWidth: 'thin',
+            '&::-webkit-scrollbar': {
+              width: '8px',
             },
-            "&::-webkit-scrollbar-track": {
-              background: "#e0e0e0",
+            '&::-webkit-scrollbar-track': {
+              background: '#e0e0e0',
             },
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#888888",
-              borderRadius: "10px",
-              border: "2px solid #e0e0e0",
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: '#888888',
+              borderRadius: '10px',
+              border: '2px solid #e0e0e0',
             },
-            "&::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: "#555555",
+            '&::-webkit-scrollbar-thumb:hover': {
+              backgroundColor: '#555555',
             },
           }}
         >
           <List>
-            {rows.map((row, idx) => (
+            {filteredRows.map((row, idx) => (
               <ListItem
                 key={row.id}
                 sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "16px",
-                  marginBottom: "8px",
-                  marginTop: "8px",
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '16px',
+                  marginBottom: '8px',
+                  marginTop: '8px',
                   boxShadow: 1,
                   borderRadius: 1,
-                  backgroundColor: "#ffffff",
-                  "&:hover": {
-                    backgroundColor: "#f0f0f0",
+                  backgroundColor: '#ffffff',
+                  '&:hover': {
+                    backgroundColor: '#f0f0f0',
                   },
-                  transition: "background-color 0.3s",
+                  transition: 'background-color 0.3s',
                 }}
               >
                 <ListItemText
                   primary={row.name}
                   secondary={`Quantity: ${row.quantity}`}
                   primaryTypographyProps={{
-                    fontSize: "1.2rem",
-                    color: "text.primary",
+                    fontSize: '1.2rem',
+                    color: 'text.primary',
                   }}
                   secondaryTypographyProps={{
-                    fontSize: "1rem",
-                    color: "text.secondary",
+                    fontSize: '1rem',
+                    color: 'text.secondary',
                   }}
                 />
                 <Box>
-                  <IconButton
-                    onClick={() => handleClickOpen(idx)}
-                    size="large"
-                    className="editIcon"
-                  >
+                  <IconButton onClick={() => handleClickOpen(idx)} size="large" className="editIcon">
                     <EditIcon fontSize="large" />
                   </IconButton>
-                  <IconButton
-                    onClick={() => handleDelete(row.id)}
-                    size="large"
-                    className="deleteIcon"
-                  >
+                  <IconButton onClick={() => handleDelete(row.id)} size="large" className="deleteIcon">
                     <DeleteIcon fontSize="large" />
                   </IconButton>
                 </Box>
@@ -321,17 +325,10 @@ const PantryList: React.FC = () => {
           </List>
         </Box>
         <Dialog open={open} onClose={handleClose}>
-          <DialogTitle sx={{ fontSize: "1.5rem", color: "text.primary" }}>
-            {isAddMode ? "Add Item" : "Edit Item"}
+          <DialogTitle sx={{ fontSize: '1.5rem', color: 'text.primary' }}>
+            {isAddMode ? 'Add Item' : 'Edit Item'}
           </DialogTitle>
           <DialogContent>
-            <DialogContentText
-              sx={{ fontSize: "1.2rem", color: "text.secondary" }}
-            >
-              {isAddMode
-                ? "To add a new item, please enter the name and quantity."
-                : "To edit the item, please modify the name and quantity. The name must be unique."}
-            </DialogContentText>
             <TextField
               autoFocus
               margin="dense"
@@ -343,10 +340,8 @@ const PantryList: React.FC = () => {
               onChange={(e) => setEditName(e.target.value)}
               error={!!error}
               helperText={error}
-              InputProps={{ sx: { fontSize: "1.2rem", color: "text.primary" } }}
-              InputLabelProps={{
-                sx: { fontSize: "1.2rem", color: "text.secondary" },
-              }}
+              InputProps={{ sx: { fontSize: '1.2rem', color: 'text.primary' } }}
+              InputLabelProps={{ sx: { fontSize: '1.2rem', color: 'text.secondary' } }}
             />
             <TextField
               margin="dense"
@@ -354,32 +349,28 @@ const PantryList: React.FC = () => {
               type="number"
               fullWidth
               variant="standard"
-              value={editQuantity ?? ""}
+              value={editQuantity ?? ''}
               onChange={(e) => setEditQuantity(Number(e.target.value))}
               inputProps={{
                 min: 0,
-                sx: { fontSize: "1.2rem", color: "text.primary" },
+                sx: { fontSize: '1.2rem', color: 'text.primary' },
               }}
-              InputLabelProps={{
-                sx: { fontSize: "1.2rem", color: "text.secondary" },
-              }}
+              InputLabelProps={{ sx: { fontSize: '1.2rem', color: 'text.secondary' } }}
             />
           </DialogContent>
           <DialogActions>
-            <IconButton
-              onClick={handleClose}
-              sx={{ fontSize: "1.2rem", color: red[500] }}
-            >
-              <CloseIcon />
+            <IconButton onClick={handleClose}>
+              <Close color="error" />
             </IconButton>
-            <IconButton
-              onClick={handleSave}
-              sx={{ fontSize: "1.2rem", color: green[500] }}
-            >
-              <CheckIcon />
+            <IconButton onClick={handleSave}>
+              <Check color="success" />
             </IconButton>
           </DialogActions>
         </Dialog>
+
+        {openCamera && (
+          <ImageCapture onImageProcessed={handleImageProcessed} onClose={() => setOpenCamera(false)} />
+        )}
       </Box>
     </ThemeProvider>
   );
