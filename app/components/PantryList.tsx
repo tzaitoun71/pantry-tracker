@@ -16,10 +16,12 @@ import {
   createTheme,
   ThemeProvider,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { Check, Close } from '@mui/icons-material';
 import { blue, red, green, amber } from '@mui/material/colors';
 import { useUser } from '../context/UserContext';
 import { db } from '../Firebase';
@@ -174,6 +176,7 @@ const PantryList: React.FC = () => {
 
   const handleImageProcessed = (itemName: string) => {
     handleClickOpen(null, itemName);
+    setOpenCamera(false); // Close the image capture modal after processing
   };
 
   return (
@@ -191,41 +194,41 @@ const PantryList: React.FC = () => {
           borderRadius: 4,
           padding: 4,
           backgroundColor: 'background.paper',
-          backdropFilter: 'blur(10px)',
+          backdropFilter: 'blur(10px)', // Blurs the background for a modern effect
           filter: '0 4px 8px rgba(0,0,0,0.1)',
         }}
       >
         <Typography variant="h5" sx={{ mb: 3, color: 'text.primary' }}>
           My Pantry
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddCircleIcon sx={{ color: 'white' }} />}
-          onClick={() => handleClickOpen(null)}
-          sx={{
-            marginBottom: 3,
-            backgroundColor: vibrantTheme.palette.secondary.main,
-            '&:hover': {
-              backgroundColor: '#33d375',
-            },
-          }}
-        >
-          Add Food
-        </Button>
-        <Button
-          variant="contained"
-          startIcon={<AddCircleIcon sx={{ color: 'white' }} />}
-          onClick={() => setOpenCamera(true)}
-          sx={{
-            marginBottom: 3,
-            backgroundColor: vibrantTheme.palette.secondary.main,
-            '&:hover': {
-              backgroundColor: '#33d375',
-            },
-          }}
-        >
-          Add Food by Picture
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2, marginBottom: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={<AddCircleIcon sx={{ color: 'white' }} />}
+            onClick={() => handleClickOpen(null)}
+            sx={{
+              backgroundColor: vibrantTheme.palette.secondary.main,
+              '&:hover': {
+                backgroundColor: '#33d375',
+              },
+            }}
+          >
+            Add Food
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddCircleIcon sx={{ color: 'white' }} />}
+            onClick={() => setOpenCamera(true)}
+            sx={{
+              backgroundColor: vibrantTheme.palette.secondary.main,
+              '&:hover': {
+                backgroundColor: '#33d375',
+              },
+            }}
+          >
+            Add Food by Picture
+          </Button>
+        </Box>
         <Box
           sx={{
             width: '100%',
@@ -330,8 +333,12 @@ const PantryList: React.FC = () => {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button onClick={handleSave}>Save</Button>
+            <IconButton onClick={handleClose}>
+              <Close color="error" />
+            </IconButton>
+            <IconButton onClick={handleSave}>
+              <Check color="success" />
+            </IconButton>
           </DialogActions>
         </Dialog>
 
