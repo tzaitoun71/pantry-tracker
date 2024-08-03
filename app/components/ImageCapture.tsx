@@ -1,79 +1,59 @@
-'use client';
-
-import React, { useRef, useState } from 'react';
-import {Camera} from 'react-camera-pro';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
-import axios from 'axios';
+import React, { useState } from 'react';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../Firebase';
 
 type ImageCaptureProps = {
   onImageProcessed: (itemName: string) => void;
   onClose: () => void;
 };
 
-type CameraRef = {
-    takePhoto: () => string;
-  };
-  
-
 const ImageCapture: React.FC<ImageCaptureProps> = ({ onImageProcessed, onClose }) => {
-  const camera = useRef<CameraRef | null>(null);
-  const [image, setImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const captureImage = () => {
-    if (camera.current) {
-      const photo = camera.current.takePhoto();
-      setImage(photo);
-    }
+  const handleCapture = ({ target }: any) => {
+    const file = target.files[0];
+    setImageFile(file);
   };
 
-  const processImage = async () => {
-    if (image) {
-      try {
-        const response = await axios.post('YOUR_OPENAI_VISION_API_URL', {
-          headers: {
-            Authorization: `Bearer YOUR_OPENAI_API_KEY`,
-            'Content-Type': 'application/json',
-          },
-          data: {
-            image: image,
-          },
-        });
-        const itemName = response.data; // Adjust based on the response structure
-        onImageProcessed(itemName);
-        onClose();
-      } catch (error) {
-        console.error('Error processing image:', error);
+  const handleConfirm = async () => {
+    if (imageFile) {
+      const storageRef = ref(storage, `images/${imageFile.name}`);
+      await uploadBytes(storageRef, imageFile);
+      const url = await getDownloadURL(storageRef);
+
+      console.log('Image URL:', url); // Log the image URL
+
+      const classifyResponse = await fetch('/api/classify-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ imageUrl: url }),
+      });
+
+      if (!classifyResponse.ok) {
+        console.error('Failed to classify image');
+        return;
       }
+
+      const result = await classifyResponse.json();
+      console.log('Classification result:', result); // Log the classification result
+
+      onImageProcessed(result.itemName);
+      onClose();
     }
   };
 
   return (
     <Dialog open={true} onClose={onClose}>
-      <DialogTitle>Capture and Identify Food</DialogTitle>
+      <DialogTitle>Capture Image</DialogTitle>
       <DialogContent>
-        {!image ? (
-          <>
-            <Camera ref={camera} aspectRatio={16 / 9} />
-            <Button onClick={captureImage} variant="contained" sx={{ mt: 2 }}>
-              Capture Image
-            </Button>
-          </>
-        ) : (
-          <>
-            <img src={image} alt="Captured" style={{ width: '100%', maxHeight: '300px' }} />
-            <Button onClick={processImage} variant="contained" sx={{ mt: 2 }}>
-              Process Image
-            </Button>
-            <Button onClick={() => setImage(null)} variant="contained" sx={{ mt: 2 }}>
-              Retake Image
-            </Button>
-          </>
-        )}
+        <input accept="image/*" type="file" onChange={handleCapture} />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant="contained" color="secondary">
-          Close
-        </Button>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={handleConfirm} disabled={!imageFile}>Confirm</Button>
       </DialogActions>
     </Dialog>
   );
