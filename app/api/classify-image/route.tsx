@@ -36,7 +36,7 @@ export async function POST(req: Request) {
           content: [
             {
               type: "text",
-              text: "What food item do you see? Give me one word and don't add a period, I want just one word.",
+              text: "What food item do you see? Give me 1-3 words maximum and don't add a period.",
             },
             {
               type: "image_url",

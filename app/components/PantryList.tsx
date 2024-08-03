@@ -17,12 +17,13 @@ import {
   ThemeProvider,
   Typography,
   CircularProgress,
+  InputAdornment,
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Check, Close } from '@mui/icons-material';
-import { blue, red, green, amber } from '@mui/material/colors';
+import { Check, Close, Search } from '@mui/icons-material';
+import { blue, red, green } from '@mui/material/colors';
 import { useUser } from '../context/UserContext';
 import { db } from '../Firebase';
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
@@ -32,25 +33,25 @@ const vibrantTheme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: amber[500],
+      main: '#007bff',
     },
     secondary: {
-      main: '#00c853',
+      main: '#28a745',
     },
     background: {
-      default: '#f0f2f5',
+      default: '#f8f9fa',
       paper: '#ffffff',
     },
     text: {
-      primary: '#333333',
-      secondary: '#666666',
+      primary: '#212529',
+      secondary: '#6c757d',
     },
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: '50px',
+          borderRadius: '8px',
           textTransform: 'none',
           padding: '10px 20px',
         },
@@ -79,15 +80,15 @@ const vibrantTheme = createTheme({
     },
   },
   typography: {
-    fontFamily: 'Poppins, sans-serif',
+    fontFamily: 'Roboto, sans-serif',
     h5: {
-      fontWeight: 'bolder',
+      fontWeight: 'bold',
     },
     body1: {
-      fontSize: '1.2rem',
+      fontSize: '1rem',
     },
     body2: {
-      fontSize: '1rem',
+      fontSize: '0.875rem',
     },
   },
 });
@@ -101,6 +102,7 @@ type PantryItem = {
 
 const PantryList: React.FC = () => {
   const [rows, setRows] = useState<PantryItem[]>([]);
+  const [filteredRows, setFilteredRows] = useState<PantryItem[]>([]);
   const [open, setOpen] = useState(false);
   const [openCamera, setOpenCamera] = useState(false);
   const [currentIdx, setCurrentIdx] = useState<number | null>(null);
@@ -108,6 +110,7 @@ const PantryList: React.FC = () => {
   const [editQuantity, setEditQuantity] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [isAddMode, setIsAddMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const { user } = useUser();
 
   const fetchPantryItems = async () => {
@@ -116,12 +119,21 @@ const PantryList: React.FC = () => {
       const querySnapshot = await getDocs(q);
       const items: PantryItem[] = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as PantryItem));
       setRows(items);
+      setFilteredRows(items); // Set the filtered rows initially to all items
     }
   };
 
   useEffect(() => {
     fetchPantryItems();
   }, [user]);
+
+  useEffect(() => {
+    if (searchQuery === '') {
+      setFilteredRows(rows);
+    } else {
+      setFilteredRows(rows.filter(row => row.name.toLowerCase().includes(searchQuery.toLowerCase())));
+    }
+  }, [searchQuery, rows]);
 
   const handleDelete = async (id: string) => {
     await deleteDoc(doc(db, 'pantry', id));
@@ -198,7 +210,7 @@ const PantryList: React.FC = () => {
           filter: '0 4px 8px rgba(0,0,0,0.1)',
         }}
       >
-        <Typography variant="h5" sx={{ mb: 3, color: 'text.primary' }}>
+        <Typography variant="h5" sx={{ mb: 3, color: 'text.primary', fontSize: '36px' }}>
           My Pantry
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, marginBottom: 3 }}>
@@ -207,9 +219,9 @@ const PantryList: React.FC = () => {
             startIcon={<AddCircleIcon sx={{ color: 'white' }} />}
             onClick={() => handleClickOpen(null)}
             sx={{
-              backgroundColor: vibrantTheme.palette.secondary.main,
+              backgroundColor: vibrantTheme.palette.primary.main,
               '&:hover': {
-                backgroundColor: '#33d375',
+                backgroundColor: vibrantTheme.palette.primary.dark,
               },
             }}
           >
@@ -222,13 +234,27 @@ const PantryList: React.FC = () => {
             sx={{
               backgroundColor: vibrantTheme.palette.secondary.main,
               '&:hover': {
-                backgroundColor: '#33d375',
+                backgroundColor: vibrantTheme.palette.secondary.dark,
               },
             }}
           >
             Add Food by Picture
           </Button>
         </Box>
+        <TextField
+          fullWidth
+          placeholder="Search for food..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ mb: 2 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+        />
         <Box
           sx={{
             width: '100%',
@@ -256,7 +282,7 @@ const PantryList: React.FC = () => {
           }}
         >
           <List>
-            {rows.map((row, idx) => (
+            {filteredRows.map((row, idx) => (
               <ListItem
                 key={row.id}
                 sx={{

@@ -14,18 +14,18 @@ const vibrantTheme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#ffcc00',
+      main: '#007bff',
     },
     secondary: {
-      main: '#00c853',
+      main: '#28a745',
     },
     background: {
-      default: '#f0f2f5',
+      default: '#f8f9fa',
       paper: '#ffffff',
     },
     text: {
-      primary: '#333333',
-      secondary: '#666666',
+      primary: '#212529',
+      secondary: '#6c757d',
     },
   },
 });
@@ -102,7 +102,7 @@ const Navbar: React.FC = () => {
                 sx={{
                   backgroundColor: vibrantTheme.palette.secondary.main,
                   '&:hover': {
-                    backgroundColor: '#33d375',
+                    backgroundColor: vibrantTheme.palette.secondary.dark,
                   },
                   width: '100%',
                 }}
@@ -113,8 +113,29 @@ const Navbar: React.FC = () => {
           )}
         </Drawer>
         {!open && (
-          <IconButton onClick={toggleDrawer(true)} sx={{ position: 'fixed', top: '50%', left: 0, zIndex: 1300 }}>
-            <ArrowForwardIosIcon sx={{ color: 'white', height: '100px', width: '100px', stroke: '#000', strokeWidth: 0.25, filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.5))'}}/>
+          <IconButton 
+            onClick={toggleDrawer(true)} 
+            sx={{ 
+              position: 'fixed', 
+              top: '50%', 
+              left: 0, 
+              zIndex: 1300, 
+              backgroundColor: vibrantTheme.palette.primary.main, 
+              color: '#fff', 
+              height: '50px', 
+              width: '50px', 
+              borderRadius: '50%', 
+              boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)',
+              '&:hover': {
+                backgroundColor: vibrantTheme.palette.primary.dark,
+              },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginLeft: '10px'
+            }}
+          >
+            <ArrowForwardIosIcon sx={{ height: '30px', width: '30px' }}/>
           </IconButton>
         )}
       </Box>

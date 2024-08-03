@@ -5,13 +5,7 @@ const DrawerList: React.FC = () => {
   return (
     <List>
       <ListItem button>
-        <ListItemText primary="Item 1" />
-      </ListItem>
-      <ListItem button>
-        <ListItemText primary="Item 2" />
-      </ListItem>
-      <ListItem button>
-        <ListItemText primary="Item 3" />
+        <ListItemText primary="Recipes" />
       </ListItem>
     </List>
   );

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState, useRef } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, CircularProgress, IconButton } from '@mui/material';
