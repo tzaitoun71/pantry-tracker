@@ -1,71 +1,58 @@
-// import { NextResponse } from 'next/server';
-// import Groq from 'groq-sdk';
-
-// const groq = new Groq({ apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY });
-
-// async function classifyImage(base64: string) {
-//   return groq.chat.completions.create({
-//     messages: [
-//       {
-//         role: "user",
-//         content: `What food item do you see give me one word? https://firebasestorage.googleapis.com/v0/b/pantry-tracker-b865c.appspot.com/o/banana.jpg?alt=media&token=6ce46dce-7451-473b-b9e0-12cf0ea1f938`,
-//       },
-//     ],
-//     model: "llama3-70b-8192", 
-//   });
-// }
-
-// export async function POST(req: Request) {
-//   try {
-//     const { image } = await req.json();
-//     if (!image) {
-//       return NextResponse.json({ error: 'Image is required' }, { status: 400 });
-//     }
-
-//     const classification = await classifyImage(image);
-//     return NextResponse.json(classification.choices[0]?.message?.content || "No response");
-//   } catch (error) {
-//     console.error('Error:', error);
-//     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-//   }
-// }
-
-
-// app/api/classify-image/route.ts
-
 import { NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
+import OpenAI from 'openai';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { storage } from '../../Firebase'; // Adjust the path as needed
 
-const groq = new Groq({ apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY });
-
-async function classifyImage(imageUrl: string) {
-  return groq.chat.completions.create({
-    messages: [
-      {
-        role: "user",
-        content: `What food item do you see? Give me one word. ${imageUrl}`,
-      },
-    ],
-    model: "llama3-70b-8192",
-  });
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function POST(req: Request) {
   try {
-    const { imageUrl } = await req.json();
+    const formData = await req.formData();
+    const file = formData.get('file') as File;
+    const userId = formData.get('userId');
 
-    if (!imageUrl) {
-      return NextResponse.json({ error: 'Image URL is required' }, { status: 400 });
+    if (!file || !userId) {
+      return NextResponse.json({ error: 'File and User ID are required' }, { status: 400 });
     }
 
-    console.log('Image URL:', imageUrl); // Log the received image URL
+    // Ensure the file is of type 'File'
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: 'Uploaded file must be a File' }, { status: 400 });
+    }
 
-    const classification = await classifyImage(imageUrl);
-    const content = classification.choices[0]?.message?.content || "No response";
+    // Upload the file to Firebase Storage
+    const storageRef = ref(storage, `images/${file.name}`);
+    await uploadBytes(storageRef, new Uint8Array(await file.arrayBuffer()));
+    const url = await getDownloadURL(storageRef);
 
-    console.log('Classification content:', content); // Log the classification result
+    // Make a request to OpenAI API
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "What food item do you see? Give me one word and don't add a period, I want just one word.",
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: url
+              }
+            },
+          ]
+        },
+      ],
+      max_tokens: 300,
+    });
 
-    return NextResponse.json({ itemName: content });
+    const itemName = response.choices?.[0]?.message?.content?.trim();
+
+    return NextResponse.json({ itemName });
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

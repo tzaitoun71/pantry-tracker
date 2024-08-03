@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -22,9 +22,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { blue, red, green, amber } from '@mui/material/colors';
 import { useUser } from '../context/UserContext';
-import { db, storage } from '../Firebase';
+import { db } from '../Firebase';
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import ImageCapture from './ImageCapture';
 
 const vibrantTheme = createTheme({
@@ -107,7 +106,7 @@ const PantryList: React.FC = () => {
   const [editQuantity, setEditQuantity] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [isAddMode, setIsAddMode] = useState(false);
-  const { user } = useUser(); // Ensure user context is available
+  const { user } = useUser();
 
   const fetchPantryItems = async () => {
     if (user) {
@@ -127,14 +126,14 @@ const PantryList: React.FC = () => {
     setRows(rows.filter((row) => row.id !== id));
   };
 
-  const handleClickOpen = (idx: number | null) => {
+  const handleClickOpen = (idx: number | null, itemName: string = '') => {
     setCurrentIdx(idx);
     if (idx !== null) {
       setEditName(rows[idx].name);
       setEditQuantity(rows[idx].quantity);
       setIsAddMode(false);
     } else {
-      setEditName('');
+      setEditName(itemName);
       setEditQuantity(null);
       setIsAddMode(true);
     }
@@ -173,23 +172,8 @@ const PantryList: React.FC = () => {
     }
   };
 
-  const handleImageProcessed = async (imageUrl: string) => {
-    const classifyResponse = await fetch('/api/classify-image', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    if (!classifyResponse.ok) {
-      console.error('Failed to classify image');
-      return;
-    }
-
-    const result = await classifyResponse.json();
-    setEditName(result.itemName);
-    handleClickOpen(null);
+  const handleImageProcessed = (itemName: string) => {
+    handleClickOpen(null, itemName);
   };
 
   return (
@@ -207,7 +191,7 @@ const PantryList: React.FC = () => {
           borderRadius: 4,
           padding: 4,
           backgroundColor: 'background.paper',
-          backdropFilter: 'blur(10px)', // Blurs the background for a modern effect
+          backdropFilter: 'blur(10px)',
           filter: '0 4px 8px rgba(0,0,0,0.1)',
         }}
       >

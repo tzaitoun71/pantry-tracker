@@ -1,61 +1,56 @@
-import React, { useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../Firebase';
+'use client'
 
-type ImageCaptureProps = {
+import React, { useState } from 'react';
+
+interface ImageCaptureProps {
   onImageProcessed: (itemName: string) => void;
   onClose: () => void;
-};
+}
 
 const ImageCapture: React.FC<ImageCaptureProps> = ({ onImageProcessed, onClose }) => {
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const handleCapture = ({ target }: any) => {
-    const file = target.files[0];
-    setImageFile(file);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setSelectedFile(event.target.files[0]);
+    }
   };
 
   const handleConfirm = async () => {
-    if (imageFile) {
-      const storageRef = ref(storage, `images/${imageFile.name}`);
-      await uploadBytes(storageRef, imageFile);
-      const url = await getDownloadURL(storageRef);
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('userId', 'someUserId'); // Add the user ID here
 
-      console.log('Image URL:', url); // Log the image URL
-
-      const classifyResponse = await fetch('/api/classify-image', {
+      const response = await fetch('/api/classify-image', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ imageUrl: url }),
+        body: formData,
       });
 
-      if (!classifyResponse.ok) {
+      if (response.ok) {
+        const result = await response.json();
+        const itemName = result.itemName;
+        if (itemName) {
+          onImageProcessed(itemName);
+        } else {
+          console.error('Failed to classify image');
+        }
+      } else {
         console.error('Failed to classify image');
-        return;
       }
-
-      const result = await classifyResponse.json();
-      console.log('Classification result:', result); // Log the classification result
-
-      onImageProcessed(result.itemName);
-      onClose();
     }
   };
 
   return (
-    <Dialog open={true} onClose={onClose}>
-      <DialogTitle>Capture Image</DialogTitle>
-      <DialogContent>
-        <input accept="image/*" type="file" onChange={handleCapture} />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleConfirm} disabled={!imageFile}>Confirm</Button>
-      </DialogActions>
-    </Dialog>
+    <div>
+      <input type="file" accept="image/*" onChange={handleFileChange} />
+      {selectedFile && (
+        <div>
+          <button onClick={handleConfirm}>Confirm</button>
+          <button onClick={onClose}>Close</button>
+        </div>
+      )}
+    </div>
   );
 };
 
