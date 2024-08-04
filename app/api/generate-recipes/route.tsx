@@ -24,13 +24,13 @@ export async function POST(req: Request) {
       messages: [
         {
           role: 'user',
-          content: `Generate a recipe using the following ingredients: ${items}. Please provide the recipe in a structured format with ingredients and steps.`,
+          content: `Using the following ingredients: ${items}, generate detailed recipes. Each recipe should be structured with a title, ingredients, and instructions. Give only 3 recipes. Dont add ### or *** in each recipe and only output the what I mentioned. Separate each recipe with a "%".`,
         },
       ],
-      max_tokens: 300,
+      max_tokens: 1000,
     });
 
-    const generatedRecipes = response.choices?.[0]?.message?.content?.trim().split('\n\n') || [];
+    const generatedRecipes = response.choices?.[0]?.message?.content?.split('%').map(recipe => recipe.trim()) || [];
     return NextResponse.json({ recipes: generatedRecipes });
   } catch (error) {
     console.error('Error:', error);

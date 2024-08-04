@@ -111,7 +111,7 @@ const RecipePage: React.FC = () => {
                       <Typography variant="h5" gutterBottom>
                         Recipe {index + 1}
                       </Typography>
-                      <Typography variant="body1">{recipe}</Typography>
+                      <Typography variant="body1" dangerouslySetInnerHTML={{ __html: recipe.replace(/\n/g, '<br />') }} />
                     </CardContent>
                   </Card>
                 ))
