@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, CircularProgress, IconButton } from '@mui/material';
-import { Check, Close, CloudUpload as CloudUploadIcon, CameraAlt as CameraAltIcon } from '@mui/icons-material';
+import { Check, Close, CloudUpload as CloudUploadIcon, CameraAlt as CameraAltIcon, SwitchCamera as SwitchCameraIcon } from '@mui/icons-material';
 import { Camera } from 'react-camera-pro';
 
 interface ImageCaptureProps {
@@ -12,6 +12,8 @@ interface ImageCaptureProps {
 
 interface CameraRef {
   takePhoto: () => string;
+  switchCamera: () => void;
+  currentDeviceId: string | null;
 }
 
 const ImageCapture: React.FC<ImageCaptureProps> = ({ onImageProcessed, onClose }) => {
@@ -50,6 +52,12 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({ onImageProcessed, onClose }
       setPreview(photo);
       setOpenCamera(false);
       setOpenPreviewModal(true);
+    }
+  };
+
+  const handleSwitchCamera = () => {
+    if (cameraRef.current) {
+      cameraRef.current.switchCamera();
     }
   };
 
@@ -138,6 +146,13 @@ const ImageCapture: React.FC<ImageCaptureProps> = ({ onImageProcessed, onClose }
                 canvas: 'Canvas is not supported.',
               }}
             />
+            <Button
+              variant="contained"
+              startIcon={<SwitchCameraIcon />}
+              onClick={handleSwitchCamera}
+            >
+              Switch Camera
+            </Button>
           </Box>
         </DialogContent>
         <DialogActions>
