@@ -1,5 +1,5 @@
 body {
-  background-image: url('./assets/pantry.jpeg'); /* Path to your image */
+  background-image: url('./assets/pantry.jpeg'); 
   background-size: cover; /* Cover the entire background */
   background-position: center; /* Center the background */
   background-repeat: no-repeat; /* Do not repeat the background image */
