@@ -28,7 +28,7 @@ import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc } 
 import ImageCapture from './ImageCapture';
 
 const primaryRed = '#e53935'; // Using the red shade from the image
-const editGreen = '#00c853'; // Color for the edit icon
+const editDarkerGreen = '#007F4C'; // Slightly darker green color for the edit icon
 
 const modernTheme = createTheme({
   palette: {
@@ -63,7 +63,7 @@ const modernTheme = createTheme({
       styleOverrides: {
         root: {
           '&.editIcon': {
-            color: editGreen,
+            color: editDarkerGreen,
             '&:hover': {
               backgroundColor: 'rgba(0, 200, 83, 0.1)',
             },
