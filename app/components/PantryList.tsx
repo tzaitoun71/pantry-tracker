@@ -16,27 +16,24 @@ import {
   createTheme,
   ThemeProvider,
   Typography,
-  CircularProgress,
   InputAdornment,
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Check, Close, Search } from '@mui/icons-material';
-import { blue, red, green } from '@mui/material/colors';
+import { Check, Close, Search, AddPhotoAlternate } from '@mui/icons-material';
 import { useUser } from '../context/UserContext';
 import { db } from '../Firebase';
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import ImageCapture from './ImageCapture';
 
-const vibrantTheme = createTheme({
+const primaryRed = '#e53935'; // Using the red shade from the image
+const editGreen = '#00c853'; // Color for the edit icon
+
+const modernTheme = createTheme({
   palette: {
-    mode: 'light',
     primary: {
-      main: '#007bff',
-    },
-    secondary: {
-      main: '#28a745',
+      main: primaryRed,
     },
     background: {
       default: '#f8f9fa',
@@ -54,6 +51,11 @@ const vibrantTheme = createTheme({
           borderRadius: '8px',
           textTransform: 'none',
           padding: '10px 20px',
+          transition: 'all 0.3s',
+          backgroundColor: primaryRed,
+          '&:hover': {
+            backgroundColor: '#d32f2f',
+          },
         },
       },
     },
@@ -61,19 +63,16 @@ const vibrantTheme = createTheme({
       styleOverrides: {
         root: {
           '&.editIcon': {
-            color: blue[500],
+            color: editGreen,
             '&:hover': {
-              color: blue[300],
-              backgroundColor: 'rgba(33, 150, 243, 0.1)',
+              backgroundColor: 'rgba(0, 200, 83, 0.1)',
             },
           },
           '&.deleteIcon': {
-            color: red[500],
+            color: '#d32f2f',
             '&:hover': {
-              color: red[300],
-              backgroundColor: 'rgba(244, 67, 54, 0.1)',
+              backgroundColor: 'rgba(211, 47, 47, 0.1)',
             },
-            transition: 'color 0.3s, background-color 0.3s',
           },
         },
       },
@@ -83,6 +82,8 @@ const vibrantTheme = createTheme({
     fontFamily: 'Roboto, sans-serif',
     h5: {
       fontWeight: 'bold',
+      fontSize: '1.5rem',
+      color: primaryRed,
     },
     body1: {
       fontSize: '1rem',
@@ -192,7 +193,7 @@ const PantryList: React.FC = () => {
   };
 
   return (
-    <ThemeProvider theme={vibrantTheme}>
+    <ThemeProvider theme={modernTheme}>
       <Box
         sx={{
           display: 'flex',
@@ -206,37 +207,23 @@ const PantryList: React.FC = () => {
           borderRadius: 4,
           padding: 4,
           backgroundColor: 'background.paper',
-          backdropFilter: 'blur(10px)', // Blurs the background for a modern effect
-          filter: '0 4px 8px rgba(0,0,0,0.1)',
         }}
       >
-        <Typography variant="h5" sx={{ mb: 3, color: 'text.primary', fontSize: '36px' }}>
+        <Typography variant="h5" sx={{ mb: 3, color: 'black' }}>
           My Pantry
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, marginBottom: 3 }}>
           <Button
             variant="contained"
-            startIcon={<AddCircleIcon sx={{ color: 'white' }} />}
+            startIcon={<AddCircleIcon />}
             onClick={() => handleClickOpen(null)}
-            sx={{
-              backgroundColor: vibrantTheme.palette.primary.main,
-              '&:hover': {
-                backgroundColor: vibrantTheme.palette.primary.dark,
-              },
-            }}
           >
             Add Food
           </Button>
           <Button
             variant="contained"
-            startIcon={<AddCircleIcon sx={{ color: 'white' }} />}
+            startIcon={<AddPhotoAlternate />}
             onClick={() => setOpenCamera(true)}
-            sx={{
-              backgroundColor: vibrantTheme.palette.secondary.main,
-              '&:hover': {
-                backgroundColor: vibrantTheme.palette.secondary.dark,
-              },
-            }}
           >
             Add Food by Picture
           </Button>
@@ -269,15 +256,15 @@ const PantryList: React.FC = () => {
               width: '8px',
             },
             '&::-webkit-scrollbar-track': {
-              background: '#e0e0e0',
+              background: '#f0f0f0',
             },
             '&::-webkit-scrollbar-thumb': {
-              backgroundColor: '#888888',
+              backgroundColor: '#b0b0b0',
               borderRadius: '10px',
-              border: '2px solid #e0e0e0',
+              border: '2px solid #f0f0f0',
             },
             '&::-webkit-scrollbar-thumb:hover': {
-              backgroundColor: '#555555',
+              backgroundColor: '#888888',
             },
           }}
         >
@@ -290,7 +277,6 @@ const PantryList: React.FC = () => {
                   justifyContent: 'space-between',
                   padding: '16px',
                   marginBottom: '8px',
-                  marginTop: '8px',
                   boxShadow: 1,
                   borderRadius: 1,
                   backgroundColor: '#ffffff',
@@ -305,11 +291,9 @@ const PantryList: React.FC = () => {
                   secondary={`Quantity: ${row.quantity}`}
                   primaryTypographyProps={{
                     fontSize: '1.2rem',
-                    color: 'text.primary',
                   }}
                   secondaryTypographyProps={{
                     fontSize: '1rem',
-                    color: 'text.secondary',
                   }}
                 />
                 <Box>
@@ -325,9 +309,7 @@ const PantryList: React.FC = () => {
           </List>
         </Box>
         <Dialog open={open} onClose={handleClose}>
-          <DialogTitle sx={{ fontSize: '1.5rem', color: 'text.primary' }}>
-            {isAddMode ? 'Add Item' : 'Edit Item'}
-          </DialogTitle>
+          <DialogTitle>{isAddMode ? 'Add Item' : 'Edit Item'}</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus
@@ -340,8 +322,6 @@ const PantryList: React.FC = () => {
               onChange={(e) => setEditName(e.target.value)}
               error={!!error}
               helperText={error}
-              InputProps={{ sx: { fontSize: '1.2rem', color: 'text.primary' } }}
-              InputLabelProps={{ sx: { fontSize: '1.2rem', color: 'text.secondary' } }}
             />
             <TextField
               margin="dense"
@@ -351,11 +331,7 @@ const PantryList: React.FC = () => {
               variant="standard"
               value={editQuantity ?? ''}
               onChange={(e) => setEditQuantity(Number(e.target.value))}
-              inputProps={{
-                min: 0,
-                sx: { fontSize: '1.2rem', color: 'text.primary' },
-              }}
-              InputLabelProps={{ sx: { fontSize: '1.2rem', color: 'text.secondary' } }}
+              inputProps={{ min: 0 }}
             />
           </DialogContent>
           <DialogActions>

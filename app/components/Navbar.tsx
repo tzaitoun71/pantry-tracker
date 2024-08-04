@@ -10,14 +10,12 @@ import { useUser } from '../context/UserContext';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useRouter } from 'next/navigation'; 
 
+const primaryRed = '#e53935';
+
 const vibrantTheme = createTheme({
   palette: {
-    mode: 'light',
     primary: {
-      main: '#007bff',
-    },
-    secondary: {
-      main: '#28a745',
+      main: primaryRed,
     },
     background: {
       default: '#f8f9fa',
@@ -26,6 +24,18 @@ const vibrantTheme = createTheme({
     text: {
       primary: '#212529',
       secondary: '#6c757d',
+    },
+  },
+  typography: {
+    fontFamily: 'Roboto, sans-serif',
+    h6: {
+      fontWeight: 'bold',
+    },
+    body1: {
+      fontSize: '1rem',
+    },
+    body2: {
+      fontSize: '0.875rem',
     },
   },
 });
@@ -60,7 +70,7 @@ const Navbar: React.FC = () => {
           onClose={toggleDrawer(false)}
           sx={{
             '& .MuiDrawer-paper': {
-              width: 240,
+              width: 280, // Increase drawer width
               boxSizing: 'border-box',
               display: 'flex',
               flexDirection: 'column',
@@ -100,9 +110,9 @@ const Navbar: React.FC = () => {
                 startIcon={<ExitToAppIcon />}
                 onClick={signOutUser}
                 sx={{
-                  backgroundColor: vibrantTheme.palette.secondary.main,
+                  backgroundColor: vibrantTheme.palette.primary.main,
                   '&:hover': {
-                    backgroundColor: vibrantTheme.palette.secondary.dark,
+                    backgroundColor: vibrantTheme.palette.primary.dark,
                   },
                   width: '100%',
                 }}
